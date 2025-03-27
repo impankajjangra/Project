@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vulnerability Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>Network Vulnerabilities</h2>
+        <button class="btn btn-primary" onclick="startScan()">Run Scan</button>
+        <div id="results" class="mt-4"></div>
+        <iframe src="http://localhost:5601" width="100%" height="600px"></iframe> <!-- Kibana Embed -->
+    </div>
+    <script>
+        function startScan() {
+            fetch('/start_scan')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('results').innerHTML = 
+                        `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                });
+        }
+    </script>
+</body>
+</html>

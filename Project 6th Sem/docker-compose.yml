@@ -1,0 +1,61 @@
+services:
+  backend:
+    build: ./backend  # Build the backend service from the backend directory
+    ports:
+      - "5000:5000"  # Expose Flask on port 5000
+    depends_on:
+      - gvm
+      - elasticsearch
+    networks:
+      - sec-net
+
+  gvm:
+    image: mikesplain/openvas:latest  # Community-supported OpenVAS
+    ports:
+      - "9390:9390"
+    environment:
+      - OV_UPDATE=yes
+    volumes:
+      - gvm_data:/var/lib/openvas
+    healthcheck:
+      test: ["CMD", "gvmd", "--status"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+    networks:
+      - sec-net
+
+  gsa:
+    image: mikesplain/openvas:latest  # Same as GVM
+    ports:
+      - "9392:9392"
+    depends_on:
+      - gvm
+    networks:
+      - sec-net
+
+  elasticsearch:
+    image: elasticsearch:7.17.7
+    environment:
+      - discovery.type=single-node
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - sec-net
+
+  kibana:
+    image: kibana:7.17.7
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - sec-net
+
+volumes:
+  gvm_data:
+  esdata:
+
+networks:
+  sec-net:
+    driver: bridge
